@@ -30,7 +30,7 @@
  */
  
 #include <TimerOne.h>
-#define MIC_PIN A5
+#define MIC_PIN A6
 #define ALPHA 0.074438
 
 float in[40] = {0};
@@ -41,6 +41,7 @@ void setup()
 {
   Timer1.initialize(25); // Initialize timer interrupt to run every 25us
   Timer1.attachInterrupt(takeSample); // Attach interrupt to the takeSample() function
+  pinMode(A6, INPUT);
   Serial.begin(9600);
 }
 
@@ -49,11 +50,13 @@ void loop()
   if (sampleCount == 40)
   {
     out[0] = in[0];
-    Serial.println(out[0]);
     for (int i; i < 40; i++)
     {
       out[i] = out[i-1] + ALPHA * (in[i] - out[i-1]);
-      Serial.println(out[i]);
+      if (out[i] > 100)
+        digitalWrite(13, HIGH);
+      else
+        digitalWrite(13, LOW);
     }
   }
 }
@@ -61,5 +64,6 @@ void loop()
 void takeSample()
 {
   in[sampleCount] = analogRead(MIC_PIN);
+  Serial.println(in[sampleCount]);
   sampleCount++;
 }
