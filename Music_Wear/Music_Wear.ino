@@ -30,40 +30,39 @@
  */
  
 #include <TimerOne.h>
+#include <ADC.h>
 #define MIC_PIN A6
 #define ALPHA 0.074438
 
-float in[40] = {0};
-float out[40] = {0};
-volatile int sampleCount = 0;
+ADC *adc = new ADC();
+float in[80] = {0};
+float out[80] = {0};
+int sampleCount = 0;
 
 void setup()
 {
   Timer1.initialize(25); // Initialize timer interrupt to run every 25us
   Timer1.attachInterrupt(takeSample); // Attach interrupt to the takeSample() function
   pinMode(A6, INPUT);
-  Serial.begin(9600);
+  pinMode(13, OUTPUT);
 }
 
 void loop()
 {
-  if (sampleCount == 40)
+  if (sampleCount == 80)
   {
     out[0] = in[0];
-    for (int i; i < 40; i++)
+    for (int i; i < 80; i++)
     {
       out[i] = out[i-1] + ALPHA * (in[i] - out[i-1]);
-      if (out[i] > 100)
-        digitalWrite(13, HIGH);
-      else
-        digitalWrite(13, LOW);
     }
+    sampleCount = 0;
   }
 }
 
 void takeSample()
 {
-  in[sampleCount] = analogRead(MIC_PIN);
-  Serial.println(in[sampleCount]);
+  in[sampleCount] = adc->analogRead(MIC_PIN);
   sampleCount++;
+  digitalWrite(13, HIGH);
 }
